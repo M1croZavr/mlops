@@ -11,6 +11,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
+pytorch-lightning = "^2.4.0"
 
 
 [build-system]
