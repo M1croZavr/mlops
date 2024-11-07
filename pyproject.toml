@@ -13,6 +13,9 @@ packages = [
 python = "^3.10"
 pytorch-lightning = "^2.4.0"
 fastapi = {extras = ["standard"], version = "^0.115.4"}
+torchvision = "^0.20.1"
+python-multipart = "^0.0.17"
+idx2numpy = "^1.2.3"
 
 [tool.poetry.scripts]
 start-server = "src.backend.main:main"
