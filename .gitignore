@@ -1,6 +1,8 @@
 .idea
 __pycache__
-lightning_logs
 .DS_Store
-data/
+lightning_logs
 artifacts/
+data/*
+!data/testSample
+!data/MNIST_DATA.tar.gz
