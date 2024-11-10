@@ -113,7 +113,7 @@ class LightningPerceptronClassifier(LightningBaseMnistModule):
 
 
 class LightningCNNClassifier(LightningBaseMnistModule):
-    """Convolutional classifier"""
+    """Convolutional neural network classifier"""
     def __init__(
         self,
         data_root: Path,
