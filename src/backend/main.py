@@ -15,7 +15,7 @@ from models.models import LightningPerceptronClassifier, LightningCNNClassifier
 
 ROOT = pathlib.Path(__file__).parent.parent.parent
 
-app = FastAPI()
+app = FastAPI(title="F-app", version="0.1.0")
 
 
 class BaseHyperparameters(BaseModel):
@@ -47,7 +47,7 @@ class HealthCheck(BaseModel):
     status: str = Field(default="OK")
 
 
-@app.post("/mnist/load_data", response_model=None, status_code=status.HTTP_201_CREATED)
+@app.post("/mnist/load_data", response_model=None, status_code=status.HTTP_201_CREATED, tags=["tar loader"])
 async def load_mnist_dataset(
     train_dataset_file: Annotated[bytes, File(description="Training MNIST dataset tar.gz archive")]
 ):
@@ -60,7 +60,7 @@ async def load_mnist_dataset(
     return
 
 
-@app.post("/mnist/fit_perceptron", response_model=None, status_code=status.HTTP_201_CREATED)
+@app.post("/mnist/fit_perceptron", response_model=None, status_code=status.HTTP_201_CREATED, tags=["fit models"])
 async def fit_mnist_perceptron(
     hyperparameters: Annotated[
         PerceptronClassifierHyperparameters,
@@ -70,12 +70,15 @@ async def fit_mnist_perceptron(
 ):
     artifacts_dir = ROOT / "artifacts" / "mnist_perceptron_classifier"
     artifacts_dir.mkdir(parents=True, exist_ok=True)
-
     if (artifacts_dir / f"{model_filename}.ckpt").exists():
         os.remove(artifacts_dir / f"{model_filename}.ckpt")
 
+    data_dir = ROOT / "data" / "MNIST_DATA"
+    if not data_dir.exists():
+        raise HTTPException(status_code=404, detail="Data was not loaded, load data before fitting the model")
+
     model = LightningPerceptronClassifier(
-        data_root=ROOT / "data" / "MNIST_DATA",
+        data_root=data_dir,
         input_dim=28 * 28,
         hidden_dim=hyperparameters.hidden_dim,
         output_dim=10,
@@ -98,7 +101,7 @@ async def fit_mnist_perceptron(
     return
 
 
-@app.post("/mnist/fit_cnn", response_model=None, status_code=status.HTTP_201_CREATED)
+@app.post("/mnist/fit_cnn", response_model=None, status_code=status.HTTP_201_CREATED, tags=["fit models"])
 async def fit_mnist_cnn(
     hyperparameters: Annotated[
         CNNClassifierHyperparameters,
@@ -112,8 +115,12 @@ async def fit_mnist_cnn(
     if (artifacts_dir / f"{model_filename}.ckpt").exists():
         os.remove(artifacts_dir / f"{model_filename}.ckpt")
 
+    data_dir = ROOT / "data" / "MNIST_DATA"
+    if not data_dir.exists():
+        raise HTTPException(status_code=404, detail="Data was not loaded, load data before fitting the model")
+
     model = LightningCNNClassifier(
-        data_root=ROOT / "data" / "MNIST_DATA",
+        data_root=data_dir,
         in_channels=1,
         hidden_channels=hyperparameters.hidden_channels,
         input_dim=28,
@@ -137,7 +144,12 @@ async def fit_mnist_cnn(
     return
 
 
-@app.get("/available_models", response_model=list[AvailableModelDescription], status_code=status.HTTP_200_OK)
+@app.get(
+    "/available_models",
+    response_model=list[AvailableModelDescription],
+    status_code=status.HTTP_200_OK,
+    tags=["available models"]
+)
 async def list_available_models() -> list[AvailableModelDescription]:
     available_models = [
         AvailableModelDescription(
@@ -157,7 +169,8 @@ async def list_available_models() -> list[AvailableModelDescription]:
 @app.post(
     "/mnist/predict_perceptron/{model_filename}",
     response_model=ModelInferenceResult,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    tags=["predict using models"]
 )
 async def predict_mnist_perceptron(
     model_filename: Annotated[str, Path(example="perceptron", title="Previously fitted model's name")],
@@ -187,7 +200,8 @@ async def predict_mnist_perceptron(
 @app.post(
     "/mnist/predict_cnn/{model_filename}",
     response_model=ModelInferenceResult,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    tags=["predict using models"]
 )
 async def predict_mnist_cnn(
     model_filename: Annotated[str, Path(example="cnn", title="Previously fitted model's name")],
@@ -214,7 +228,7 @@ async def predict_mnist_cnn(
     return model_inference_result
 
 
-@app.delete("/mnist/{model_filename}", response_model=None, status_code=status.HTTP_200_OK)
+@app.delete("/mnist/{model_filename}", response_model=None, status_code=status.HTTP_200_OK, tags=["delete models"])
 def delete_checkpoint(
     model_filename: Annotated[str, Path(examples=["perceptron", "cnn"], title="Previously fitted model's name")]
 ):
@@ -233,7 +247,7 @@ def delete_checkpoint(
     response_model=HealthCheck,
     status_code=status.HTTP_200_OK,
     tags=["healthcheck"],
-    summary="Perform a Health Check",
+    summary="Perform Health Check",
     response_description="Return HTTP Status Code 200 if the service is OK"
 )
 def perform_healthcheck() -> HealthCheck:
