@@ -16,6 +16,8 @@ fastapi = {extras = ["standard"], version = "^0.115.4"}
 torchvision = "^0.20.1"
 python-multipart = "^0.0.17"
 idx2numpy = "^1.2.3"
+grpcio = "^1.67.1"
+grpcio-tools = "^1.67.1"
 
 [tool.poetry.scripts]
 start-server = "src.backend.main:main"
