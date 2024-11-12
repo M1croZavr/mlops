@@ -18,6 +18,8 @@ python-multipart = "^0.0.17"
 idx2numpy = "^1.2.3"
 grpcio = "^1.67.1"
 grpcio-tools = "^1.67.1"
+streamlit = "^1.40.1"
+streamlit-drawable-canvas = "^0.9.3"
 
 [tool.poetry.scripts]
 start-server = "src.backend.main:main"
