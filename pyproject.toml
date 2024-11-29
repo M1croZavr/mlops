@@ -1,11 +1,15 @@
 [tool.poetry]
 name = "mlops-project"
 version = "0.1.0"
-description = ""
+description = "MLops project OmegaLUL"
 authors = ["M1croZavr <tlashukov@gmail.com>"]
+repository = "https://github.com/M1croZavr/mlops"
 readme = "README.md"
+package-mode = true
 packages = [
-    {include = "backend", from = "src"},
+    {include = "dashboard", from = "src"},
+    {include = "fastapi_service", from = "src"},
+    {include = "grpc_service", from = "src"},
     {include = "models", from = "src"}
 ]
 
@@ -22,7 +26,7 @@ streamlit = "^1.40.1"
 streamlit-drawable-canvas = "^0.9.3"
 
 [tool.poetry.scripts]
-start-server = "src.backend.main:main"
+start-server = "src.fastapi_service.main:main"
 
 [build-system]
 requires = ["poetry-core"]
