@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 import ml_service_pb2
 import ml_service_pb2_grpc
 from global_vars import MAX_MESSAGE_LENGTH, DATA_PATH
-from models.models import LightningPerceptronClassifier
+from models.modules import LightningPerceptronClassifier
 
 
 class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):

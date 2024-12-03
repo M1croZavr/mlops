@@ -4,5 +4,5 @@ __pycache__
 lightning_logs
 artifacts/
 data/*
-#!data/testSample
-!data/MNIST_DATA.tar.gz
+!data/MNIST.tar.gz
+!data/CIFAR10.tar.gz
