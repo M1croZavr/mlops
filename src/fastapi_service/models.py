@@ -25,7 +25,7 @@ class AvailableModelDescription(BaseModel):
 
 
 class AvailableCheckpointDescription(BaseModel):
-    dataset_name: str
+    dataset_folder_name: str
     model_filename: str
 
 

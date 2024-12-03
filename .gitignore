@@ -6,3 +6,4 @@ artifacts/
 data/*
 !data/MNIST.tar.gz
 !data/CIFAR10.tar.gz
+.ruff_cache

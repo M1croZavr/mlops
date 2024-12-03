@@ -1,15 +1,14 @@
 import io
-import pathlib
 import tarfile
 import time
 from concurrent import futures
 
 import grpc
-import pytorch_lightning as pl
-
 import ml_service_pb2
 import ml_service_pb2_grpc
-from global_vars import MAX_MESSAGE_LENGTH, DATA_PATH
+import pytorch_lightning as pl
+from global_vars import DATA_PATH, MAX_MESSAGE_LENGTH
+
 from models.modules import LightningPerceptronClassifier
 
 
@@ -39,11 +38,11 @@ class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):
         return ml_service_pb2.LoadDataResponse(success=success, message=message)
 
     def TrainModel(self, request, context):
-        print(f"Training model with {request.epochs} epochs and learning rate {request.learning_rate}")
+        print(
+            f"Training model with {request.epochs} epochs and learning rate {request.learning_rate}"
+        )
         training_accuracy = 0.85
         success = True
-
-        root = pathlib.Path(__file__).parent.parent.parent
 
         model = LightningPerceptronClassifier(
             data_root=DATA_PATH / "MNIST_DATA",
@@ -51,7 +50,7 @@ class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):
             hidden_dim=16,
             output_dim=10,
             learning_rate=0.001,
-            batch_size=32
+            batch_size=32,
         )
         # checkpoint_callback = pl.callbacks.ModelCheckpoint(
         #     dirpath=artifacts_dir,
@@ -62,25 +61,31 @@ class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):
         trainer = pl.Trainer(
             # fast_dev_run=True,
             max_epochs=3,
-            enable_checkpointing=False
+            enable_checkpointing=False,
             # max_epochs=hyperparameters.epochs,
             # default_root_dir=artifacts_dir,
             # callbacks=[checkpoint_callback]
         )
         trainer.fit(model)
 
-        return ml_service_pb2.TrainModelResponse(success=success, message="Training completed",
-                                                 training_accuracy=training_accuracy)
+        return ml_service_pb2.TrainModelResponse(
+            success=success,
+            message="Training completed",
+            training_accuracy=training_accuracy,
+        )
 
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                                 options=[('grpc.max_message_length', MAX_MESSAGE_LENGTH),
-                                  ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-                                  ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)]
-                                 )
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=10),
+        options=[
+            ("grpc.max_message_length", MAX_MESSAGE_LENGTH),
+            ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ],
+    )
     ml_service_pb2_grpc.add_MLServiceServicer_to_server(MLServiceServicer(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port("[::]:50051")
     server.start()
     print("Server started on port 50051")
     try:

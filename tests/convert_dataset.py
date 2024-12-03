@@ -1,5 +1,4 @@
-from torchvision.datasets import MNIST, CIFAR10
-
+from torchvision.datasets import CIFAR10
 
 # mnist_dataset_train = MNIST("./", train=True, download=True)
 # mnist_dataset_test = MNIST("./", train=False, download=True)
@@ -10,6 +9,8 @@ mnist_dataset_test = CIFAR10("./", train=False, download=True)
 print(mnist_dataset_test.classes)
 # import pathlib
 #
+
+
 # d = pathlib.Path("CIFAR10")
 # d.mkdir(exist_ok=True)
 # d_train = d / "train" / "images"
@@ -33,6 +34,3 @@ print(mnist_dataset_test.classes)
 # with open(d / "validation" / "targets.pkl", "wb") as f:
 #     import pickle
 #     pickle.dump(labels, f)
-
-
-

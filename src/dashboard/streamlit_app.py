@@ -1,4 +1,5 @@
 import io
+
 import requests
 import streamlit as st
 from PIL import Image
@@ -19,14 +20,18 @@ def is_fastapi_running():
 
 
 st.title("Распознователь цифр 3000")
-st.write("Данный интерфейс позволяет обучить две нейронки на данных \
-          MNIST и затем проверить модель на рукописных цифрах")
+st.write(
+    "Данный интерфейс позволяет обучить две нейронки на данных \
+          MNIST и затем проверить модель на рукописных цифрах"
+)
 
 st.subheader("1. Загрузка данных")
 st.write("Подружаем датасет MNIST")
 if st.button("Загрузить данные"):
     with open("data/MNIST_DATA.tar.gz", "rb") as f:
-        response = requests.post(f"{API_URL}/mnist/load_data", files={"train_dataset_file": f})
+        response = requests.post(
+            f"{API_URL}/mnist/load_data", files={"train_dataset_file": f}
+        )
         if response.status_code == 201:
             st.success("MNIST датасет успешно загружен!")
         else:
@@ -35,9 +40,11 @@ if st.button("Загрузить данные"):
 
 st.subheader("2. Обучение модели")
 
-model_type = st.selectbox("Выберите модель для обучения (можно обучить обе по очереди)", ["Perceptron", "CNN"])
+model_type = st.selectbox(
+    "Выберите модель для обучения (можно обучить обе по очереди)", ["Perceptron", "CNN"]
+)
 epochs = st.slider("Epochs", 1, 10, 2)
-learning_rate = st.slider("Learning Rate", 0.0001, 0.01, 0.001, 0.0001, format='%f')
+learning_rate = st.slider("Learning Rate", 0.0001, 0.01, 0.001, 0.0001, format="%f")
 batch_size = st.slider("Batch Size", 16, 128, 32, 16)
 
 if model_type == "Perceptron":
@@ -46,7 +53,7 @@ if model_type == "Perceptron":
         "epochs": epochs,
         "learning_rate": learning_rate,
         "batch_size": batch_size,
-        "hidden_dim": hidden_dim
+        "hidden_dim": hidden_dim,
     }
     endpoint = "/mnist/fit_perceptron"
 else:
@@ -55,14 +62,17 @@ else:
         "epochs": epochs,
         "learning_rate": learning_rate,
         "batch_size": batch_size,
-        "hidden_channels": hidden_channels
+        "hidden_channels": hidden_channels,
     }
     endpoint = "/mnist/fit_cnn"
 
 
 if st.button(f"Обучить {model_type} модель"):
     with st.spinner("Идет обучение..."):
-        response = requests.post(f"{API_URL}{endpoint}?model_filename={model_type.lower()}", json=hyperparameters)
+        response = requests.post(
+            f"{API_URL}{endpoint}?model_filename={model_type.lower()}",
+            json=hyperparameters,
+        )
     if response.status_code == 201:
         st.success(f"{model_type} модель успешно обучена.")
     else:
@@ -93,11 +103,11 @@ if st.button("Предсказать") and canvas_result.image_data is not None:
 
     perceptron_response = requests.post(
         f"{API_URL}/mnist/predict_perceptron/perceptron",
-        files={"file": ("image.jpg", img_data, "image/jpeg")}
+        files={"file": ("image.jpg", img_data, "image/jpeg")},
     )
     cnn_response = requests.post(
         f"{API_URL}/mnist/predict_cnn/cnn",
-        files={"file": ("image.jpg", img_data, "image/jpeg")}
+        files={"file": ("image.jpg", img_data, "image/jpeg")},
     )
 
     if perceptron_response.status_code == 200:

@@ -22,16 +22,24 @@ def get_checkpoint_dir_and_name(dataset_folder_name: str, model_filename: str):
 def get_dataset_dir(dataset_folder_name: str):
     dataset_dir = DATA_ROOT / dataset_folder_name
     if not dataset_dir.exists():
-        raise HTTPException(status_code=404, detail="Data was not loaded, load data before fitting the model")
+        raise HTTPException(
+            status_code=404,
+            detail="Data was not loaded, load data before fitting the model",
+        )
     else:
         return dataset_dir
 
 
 def get_all_checkpoints_info():
     checkpoints_list = []
-    for dataset_name in os.listdir(ARTIFACTS_ROOT):
-        for model_filename in (ARTIFACTS_ROOT / dataset_name).glob("*.ckpt"):
-            checkpoints_list.append({"dataset_name": dataset_name, "model_filename": model_filename.name})
+    for dataset_folder_name in os.listdir(ARTIFACTS_ROOT):
+        for model_filename in (ARTIFACTS_ROOT / dataset_folder_name).glob("*.ckpt"):
+            checkpoints_list.append(
+                {
+                    "dataset_folder_name": dataset_folder_name,
+                    "model_filename": model_filename.name.rstrip(".ckpt"),
+                }
+            )
     return checkpoints_list
 
 
@@ -43,7 +51,7 @@ def get_checkpoint_path(dataset_folder_name: str, model_filename: str):
     if not checkpoint_path.exists():
         raise HTTPException(
             status_code=404,
-            detail="Checkpoint of Lightning Model for provided model_filename not found"
+            detail="Checkpoint of Lightning Model for provided model_filename not found",
         )
 
     return checkpoint_path
@@ -52,4 +60,8 @@ def get_checkpoint_path(dataset_folder_name: str, model_filename: str):
 def get_width_height_channels(dataset_folder_name: str):
     images_dir = DATA_ROOT / dataset_folder_name / "train" / "images"
     random_train_image = Image.open(images_dir / random.choice(os.listdir(images_dir)))
-    return random_train_image.width, random_train_image.height, get_image_num_channels(random_train_image)
+    return (
+        random_train_image.width,
+        random_train_image.height,
+        get_image_num_channels(random_train_image),
+    )

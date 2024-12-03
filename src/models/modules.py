@@ -1,27 +1,16 @@
-import os
-import pickle
-from pathlib import Path
-
-import idx2numpy
 import pytorch_lightning as pl
 import torch
-from PIL import Image
 from torch import nn
 from torch.nn import functional as F
-from torchvision import transforms
 
-from fastapi_service.utils import get_width_height_channels, get_dataset_dir
+from fastapi_service.utils import get_dataset_dir, get_width_height_channels
 from models.dataset import Dataset
 
 
 class LightningBaseModule(pl.LightningModule):
     """Base LightningModule"""
 
-    def __init__(
-        self,
-        dataset_folder_name: str,
-        batch_size: int = 32
-    ):
+    def __init__(self, dataset_folder_name: str, batch_size: int = 32):
         super(LightningBaseModule, self).__init__()
 
         self.dataset_dir = get_dataset_dir(dataset_folder_name)
@@ -38,7 +27,11 @@ class LightningBaseModule(pl.LightningModule):
         train_dataset = Dataset(self.dataset_dir / "train")
         loader = torch.utils.data.DataLoader(
             train_dataset,
-            batch_size=self.batch_size, shuffle=True, drop_last=True, num_workers=4, persistent_workers=True
+            batch_size=self.batch_size,
+            shuffle=True,
+            drop_last=True,
+            num_workers=4,
+            persistent_workers=True,
         )
         return loader
 
@@ -52,7 +45,10 @@ class LightningBaseModule(pl.LightningModule):
     def val_dataloader(self) -> torch.utils.data.DataLoader:
         validation_dataset = Dataset(self.dataset_dir / "validation")
         loader = torch.utils.data.DataLoader(
-            validation_dataset, batch_size=self.batch_size, num_workers=4, persistent_workers=True
+            validation_dataset,
+            batch_size=self.batch_size,
+            num_workers=4,
+            persistent_workers=True,
         )
         return loader
 
@@ -69,31 +65,22 @@ class LightningPerceptronClassifier(LightningBaseModule):
         batch_size: int = 32,
     ):
         super(LightningPerceptronClassifier, self).__init__(
-            dataset_folder_name=dataset_folder_name,
-            batch_size=batch_size
+            dataset_folder_name=dataset_folder_name, batch_size=batch_size
         )
 
-        images_width, images_height, images_channels = get_width_height_channels(dataset_folder_name)
+        images_width, images_height, images_channels = get_width_height_channels(
+            dataset_folder_name
+        )
 
         self.fc1 = nn.Linear(
             in_features=images_width * images_height * images_channels,
-            out_features=hidden_dim
+            out_features=hidden_dim,
         )
-        self.fc2 = nn.Linear(
-            in_features=hidden_dim,
-            out_features=hidden_dim * 2
-        )
-        self.fc3 = nn.Linear(
-            in_features=hidden_dim * 2,
-            out_features=output_dim
-        )
+        self.fc2 = nn.Linear(in_features=hidden_dim, out_features=hidden_dim * 2)
+        self.fc3 = nn.Linear(in_features=hidden_dim * 2, out_features=output_dim)
 
-        self.bn1 = nn.BatchNorm1d(
-            num_features=hidden_dim
-        )
-        self.bn2 = nn.BatchNorm1d(
-            num_features=hidden_dim * 2
-        )
+        self.bn1 = nn.BatchNorm1d(num_features=hidden_dim)
+        self.bn2 = nn.BatchNorm1d(num_features=hidden_dim * 2)
 
         self.relu = nn.ReLU()
 
@@ -128,56 +115,49 @@ class LightningCNNClassifier(LightningBaseModule):
         batch_size: int = 32,
     ):
         super(LightningCNNClassifier, self).__init__(
-            dataset_folder_name=dataset_folder_name,
-            batch_size=batch_size
+            dataset_folder_name=dataset_folder_name, batch_size=batch_size
         )
 
-        images_width, images_height, images_channels = get_width_height_channels(dataset_folder_name)
+        images_width, images_height, images_channels = get_width_height_channels(
+            dataset_folder_name
+        )
 
         self.c1 = nn.Conv2d(
             in_channels=images_channels,
             out_channels=hidden_channels,
             kernel_size=3,
-            padding=1
+            padding=1,
         )
         self.c2 = nn.Conv2d(
             in_channels=hidden_channels,
             out_channels=hidden_channels,
             kernel_size=3,
-            padding=1
+            padding=1,
         )
         self.c3 = nn.Conv2d(
             in_channels=hidden_channels,
             out_channels=hidden_channels * 2,
             kernel_size=3,
-            padding=1
+            padding=1,
         )
         self.c4 = nn.Conv2d(
             in_channels=hidden_channels * 2,
             out_channels=hidden_channels * 2,
             kernel_size=3,
-            padding=1
+            padding=1,
         )
 
         self.p1 = nn.MaxPool2d(2, 2)
         self.p2 = nn.MaxPool2d(2, 2)
 
-        self.bn1 = nn.BatchNorm2d(
-            num_features=hidden_channels
-        )
-        self.bn2 = nn.BatchNorm2d(
-            num_features=hidden_channels
-        )
-        self.bn3 = nn.BatchNorm2d(
-            num_features=hidden_channels * 2
-        )
-        self.bn4 = nn.BatchNorm2d(
-            num_features=hidden_channels * 2
-        )
+        self.bn1 = nn.BatchNorm2d(num_features=hidden_channels)
+        self.bn2 = nn.BatchNorm2d(num_features=hidden_channels)
+        self.bn3 = nn.BatchNorm2d(num_features=hidden_channels * 2)
+        self.bn4 = nn.BatchNorm2d(num_features=hidden_channels * 2)
 
         self.fc = nn.Linear(
             in_features=int((images_width / 4) ** 2 * hidden_channels * 2),
-            out_features=output_dim
+            out_features=output_dim,
         )
 
         self.relu = nn.ReLU()
