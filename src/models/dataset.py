@@ -1,26 +1,30 @@
-import os
 import pickle
-from pathlib import Path
 
 import torch
 from PIL import Image
 from torchvision import transforms
 
+from fastapi_service.s3 import client, datasets_bucket_name
+
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, split_dir: Path):
-        self.images_dir = split_dir / "images"
-        self.images_files = os.listdir(self.images_dir)
+    def __init__(self, split_dir: str):
+        self.images_dir = f"{split_dir}/images/"
+        self.images_files = list(
+            client.list_objects(datasets_bucket_name, self.images_dir)
+        )
 
-        self.target_pkl_file = split_dir / "targets.pkl"
-        with open(self.target_pkl_file, "rb") as file:
-            self.targets = pickle.load(file)
+        self.target_pkl_file = f"{split_dir}/targets.pkl"
+        self.targets = pickle.load(
+            client.get_object(datasets_bucket_name, self.target_pkl_file)
+        )
 
         self.transforms = transforms.Compose([transforms.ToTensor()])
 
     def __getitem__(self, item: int):
-        image = Image.open(self.images_dir / self.images_files[item])
-        target = self.targets[self.images_files[item]]
+        image_filename = self.images_files[item].object_name
+        image = Image.open(client.get_object(datasets_bucket_name, image_filename))
+        target = self.targets[image_filename.split("/")[-1]]
 
         return self.transforms(image), target
 

@@ -3,7 +3,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from fastapi_service.utils import get_dataset_dir, get_width_height_channels
+from fastapi_service.s3.utils import get_dataset_dir, get_width_height_channels
 from models.dataset import Dataset
 
 
@@ -24,7 +24,7 @@ class LightningBaseModule(pl.LightningModule):
         return {"loss": loss}
 
     def train_dataloader(self) -> torch.utils.data.DataLoader:
-        train_dataset = Dataset(self.dataset_dir / "train")
+        train_dataset = Dataset(f"{self.dataset_dir}/train")
         loader = torch.utils.data.DataLoader(
             train_dataset,
             batch_size=self.batch_size,
@@ -43,7 +43,7 @@ class LightningBaseModule(pl.LightningModule):
         return {"loss": loss}
 
     def val_dataloader(self) -> torch.utils.data.DataLoader:
-        validation_dataset = Dataset(self.dataset_dir / "validation")
+        validation_dataset = Dataset(f"{self.dataset_dir}/validation")
         loader = torch.utils.data.DataLoader(
             validation_dataset,
             batch_size=self.batch_size,

@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 
+from fastapi_service.s3.utils import save_checkpoint
 from fastapi_service.utils import get_checkpoint_dir_and_name
 
 
@@ -26,5 +27,9 @@ def train(
         callbacks=[checkpoint_callback],
     )
     trainer.fit(model)
+
+    save_checkpoint(
+        checkpoint_dir / checkpoint_name, dataset_folder_name, model_filename
+    )
 
     return

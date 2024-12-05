@@ -5,9 +5,10 @@ from typing import Annotated
 
 import psutil
 import uvicorn
-from fastapi import Body, FastAPI, File, HTTPException, Path, Query, UploadFile, status
+from fastapi import Body, FastAPI, File, Path, Query, UploadFile, status
+from tqdm import tqdm
 
-from fastapi_service.config import ARTIFACTS_ROOT, CLASS_LABELS, DATA_ROOT
+from fastapi_service.config import APP_PORT, APP_VERSION, ARTIFACTS_ROOT, CLASS_LABELS
 from fastapi_service.models import (
     AvailableCheckpointDescription,
     AvailableModelDescription,
@@ -16,11 +17,16 @@ from fastapi_service.models import (
     ModelInferenceResult,
     PerceptronClassifierHyperparameters,
 )
-from fastapi_service.utils import get_all_checkpoints_info, get_checkpoint_path
+from fastapi_service.s3 import client, datasets_bucket_name
+from fastapi_service.s3.utils import (
+    delete_checkpoint_from_storage,
+    get_all_checkpoints_info,
+    get_checkpoint_path,
+)
 from models import inference, train
 from models.modules import LightningCNNClassifier, LightningPerceptronClassifier
 
-app = FastAPI(title="F-app", version="0.1.0")
+app = FastAPI(title="F-app", version=APP_VERSION)
 
 
 @app.post("/load_data", status_code=status.HTTP_201_CREATED, tags=["load dataset"])
@@ -32,9 +38,10 @@ async def load_dataset(
         ),
     ],
 ):
-    """Loads tar.gz archive from request and extract into data folder.
+    """Loads tar.gz archive from request and extract into s3 object storage.
 
-    Note that dataset is identified by archive name and should have `train` and `validation` folders inside
+    Note that dataset is identified by archive name (root directory name e.g. MNIST, CIFAR10)
+    and should have `train` and `validation` folders inside
     which consist of pictures PIL.Image readable format.
 
     Parameters
@@ -44,13 +51,19 @@ async def load_dataset(
 
     Returns
     -------
-    None
+    dict
     """
-    DATA_ROOT.mkdir(exist_ok=True)
-
     io_dataset_bytes = io.BytesIO(dataset_file)
     with tarfile.open(mode="r:gz", fileobj=io_dataset_bytes) as tar:
-        tar.extractall(path=DATA_ROOT)
+        for tar_member in tqdm(tar.getmembers()):
+            if tar_member.isfile():
+                client.put_object(
+                    datasets_bucket_name,
+                    tar_member.name,
+                    tar.extractfile(tar_member),
+                    length=-1,
+                    part_size=5 * 1024 * 1024,
+                )
 
     return {}
 
@@ -66,7 +79,7 @@ async def fit_perceptron(
         Query(description="Folder name for a dataset", examples=["MNIST", "CIFAR10"]),
     ] = "MNIST",
     model_filename: Annotated[
-        str, Query(description="Filename for a model checkpoint *.ckpt")
+        str, Query(description="Filename for a model checkpoint {model_filename}.ckpt")
     ] = "perceptron",
 ):
     model = LightningPerceptronClassifier(
@@ -92,7 +105,7 @@ async def fit_cnn(
         Query(description="Folder name for a dataset", examples=["MNIST", "CIFAR10"]),
     ] = "MNIST",
     model_filename: Annotated[
-        str, Query(description="Filename for a model checkpoint *.ckpt")
+        str, Query(description="Filename for a model checkpoint {model_filename}.ckpt")
     ] = "cnn",
 ):
     model = LightningCNNClassifier(
@@ -186,14 +199,14 @@ async def delete_checkpoint(
         Path(examples=["perceptron", "cnn"], title="Previously fitted model's name"),
     ],
 ):
-    model_filenames_paths = ARTIFACTS_ROOT.glob(f"*/{model_filename}.ckpt")
-    if not model_filenames_paths:
-        raise HTTPException(
-            status_code=404, detail="Checkpoint for provided model_filename not found"
-        )
-    else:
+    # Remove locally if exists
+    model_filenames_paths = ARTIFACTS_ROOT.glob(f"*/{model_filename.rstrip('.ckpt')}.ckpt")
+    if model_filenames_paths:
         for model_filename_path in model_filenames_paths:
             os.remove(model_filename_path)
+
+    # Remove from object storage
+    delete_checkpoint_from_storage(model_filename)
 
     return {}
 
@@ -219,7 +232,7 @@ async def perform_healthcheck() -> HealthCheck:
 def main():
     """Launch uvicorn server on specified host and port"""
     uvicorn.run(
-        "src.fastapi_service.main:app", host="127.0.0.1", port=8000, reload=True
+        "src.fastapi_service.main:app", host="127.0.0.1", port=APP_PORT, reload=True
     )
 
 

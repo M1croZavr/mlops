@@ -13,8 +13,8 @@ def get_checkpoint_dir_and_name(dataset_folder_name: str, model_filename: str):
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_name = model_filename
 
-    if (checkpoint_dir / checkpoint_name).exists():
-        os.remove(checkpoint_dir / checkpoint_name)
+    if os.path.exists(f"{(checkpoint_dir / checkpoint_name).resolve()}.ckpt"):
+        os.remove(f"{(checkpoint_dir / checkpoint_name).resolve()}.ckpt")
 
     return checkpoint_dir, checkpoint_name
 
