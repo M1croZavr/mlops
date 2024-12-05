@@ -8,7 +8,13 @@ import uvicorn
 from fastapi import Body, FastAPI, File, Path, Query, UploadFile, status
 from tqdm import tqdm
 
-from fastapi_service.config import APP_PORT, APP_VERSION, ARTIFACTS_ROOT, CLASS_LABELS
+from fastapi_service.config import (
+    APP_HOST,
+    APP_PORT,
+    APP_VERSION,
+    ARTIFACTS_ROOT,
+    CLASS_LABELS,
+)
 from fastapi_service.models import (
     AvailableCheckpointDescription,
     AvailableModelDescription,
@@ -200,7 +206,9 @@ async def delete_checkpoint(
     ],
 ):
     # Remove locally if exists
-    model_filenames_paths = ARTIFACTS_ROOT.glob(f"*/{model_filename.rstrip('.ckpt')}.ckpt")
+    model_filenames_paths = ARTIFACTS_ROOT.glob(
+        f"*/{model_filename.rstrip('.ckpt')}.ckpt"
+    )
     if model_filenames_paths:
         for model_filename_path in model_filenames_paths:
             os.remove(model_filename_path)
@@ -232,7 +240,7 @@ async def perform_healthcheck() -> HealthCheck:
 def main():
     """Launch uvicorn server on specified host and port"""
     uvicorn.run(
-        "src.fastapi_service.main:app", host="127.0.0.1", port=APP_PORT, reload=True
+        "src.fastapi_service.main:app", host=APP_HOST, port=APP_PORT, reload=True
     )
 
 

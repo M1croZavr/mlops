@@ -1,7 +1,9 @@
 import pathlib
 
 APP_VERSION = "0.1.0"
-APP_PORT = 8000
+# Specify this host inside container to reach uvicorn on localhost
+APP_HOST = "0.0.0.0"
+APP_PORT = 5000
 
 ROOT = pathlib.Path(__file__).parent.parent.parent
 DATA_ROOT = ROOT / "data"

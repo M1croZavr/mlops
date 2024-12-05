@@ -2,7 +2,6 @@ import random
 from pathlib import Path
 
 from fastapi import HTTPException
-from minio.deleteobjects import DeleteObject
 from minio.error import S3Error
 from PIL import Image
 from torchvision.transforms.functional import get_image_num_channels

@@ -8,8 +8,10 @@ load_dotenv()  # Load environment variables from .env file
 ACCESS_KEY = os.getenv("MINIO_ROOT_USER")
 SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD")
 
+minio_host = "minio"
+minio_port = 9000
 client = Minio(
-    "127.0.0.1:9000",
+    f"{minio_host}:{minio_port}",
     access_key=ACCESS_KEY,
     secret_key=SECRET_KEY,
     secure=False,
