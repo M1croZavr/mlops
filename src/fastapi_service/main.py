@@ -6,7 +6,6 @@ from typing import Annotated
 import psutil
 import uvicorn
 from fastapi import Body, FastAPI, File, Path, Query, UploadFile, status
-from tqdm import tqdm
 
 from fastapi_service.config import (
     APP_HOST,
@@ -23,9 +22,9 @@ from fastapi_service.models import (
     ModelInferenceResult,
     PerceptronClassifierHyperparameters,
 )
-from fastapi_service.s3 import client, datasets_bucket_name
 from fastapi_service.s3.utils import (
     delete_checkpoint_from_storage,
+    extract_tar_into_s3,
     get_all_checkpoints_info,
     get_checkpoint_path,
 )
@@ -61,15 +60,7 @@ async def load_dataset(
     """
     io_dataset_bytes = io.BytesIO(dataset_file)
     with tarfile.open(mode="r:gz", fileobj=io_dataset_bytes) as tar:
-        for tar_member in tqdm(tar.getmembers()):
-            if tar_member.isfile():
-                client.put_object(
-                    datasets_bucket_name,
-                    tar_member.name,
-                    tar.extractfile(tar_member),
-                    length=-1,
-                    part_size=5 * 1024 * 1024,
-                )
+        extract_tar_into_s3(tar)
 
     return {}
 

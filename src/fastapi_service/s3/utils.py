@@ -1,13 +1,28 @@
 import random
 from pathlib import Path
+from tarfile import TarFile
 
 from fastapi import HTTPException
 from minio.error import S3Error
 from PIL import Image
 from torchvision.transforms.functional import get_image_num_channels
+from tqdm import tqdm
 
 from fastapi_service.config import ARTIFACTS_ROOT
 from fastapi_service.s3 import artifacts_bucket_name, client, datasets_bucket_name
+
+
+def extract_tar_into_s3(tar: TarFile):
+    for tar_member in tqdm(tar.getmembers()):
+        if tar_member.isfile():
+            client.put_object(
+                datasets_bucket_name,
+                tar_member.name,
+                tar.extractfile(tar_member),
+                length=-1,
+                part_size=5 * 1024 * 1024,
+            )
+    return
 
 
 def get_dataset_dir(dataset_folder_name: str):
