@@ -17,8 +17,12 @@ client = Minio(
     secure=False,
 )
 
+sources_bucket_name = "sources"
 datasets_bucket_name = "datasets"
 artifacts_bucket_name = "artifacts"
+# Make sources bucket
+if not client.bucket_exists(sources_bucket_name):
+    client.make_bucket(sources_bucket_name)
 # Make datasets bucket
 if not client.bucket_exists(datasets_bucket_name):
     client.make_bucket(datasets_bucket_name)
