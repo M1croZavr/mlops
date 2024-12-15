@@ -4,7 +4,7 @@ RUN pip3 install poetry==1.8.2
 
 WORKDIR /app
 
-COPY .env README.md ./
+COPY README.md ./
 COPY tests ./tests
 
 COPY pyproject.toml poetry.lock ./

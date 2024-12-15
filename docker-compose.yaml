@@ -6,6 +6,9 @@ services:
       - "8000:8000"
     depends_on:
       - minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
 
   minio:
     container_name: minio
