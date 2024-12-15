@@ -1,14 +1,18 @@
 FROM python:3.10-bullseye
 
 RUN pip3 install poetry==1.8.2
-RUN pip3 install cmake
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock .env README.md ./
-COPY src ./src
+COPY .env README.md ./
 COPY tests ./tests
 
-RUN poetry install --without dev
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --without dev --no-root
+
+COPY src ./src
+RUN poetry install --only-root
+
+EXPOSE 8000
 
 ENTRYPOINT ["poetry", "run", "start-server"]

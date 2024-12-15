@@ -2,9 +2,8 @@ services:
   app:
     container_name: app
     build: .
-    command: poetry run start-server
     ports:
-      - "8000:5000"
+      - "8000:8000"
     depends_on:
       - minio
 
