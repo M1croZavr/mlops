@@ -1,6 +1,7 @@
 services:
   app:
     container_name: app
+    image: mlops-app
     build: .
     ports:
       - "8000:8000"

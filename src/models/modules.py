@@ -14,6 +14,9 @@ class LightningBaseModule(pl.LightningModule):
         super(LightningBaseModule, self).__init__()
 
         self.dataset_dir = get_dataset_dir(dataset_folder_name)
+        self.images_width, self.images_height, self.images_channels = (
+            get_width_height_channels(dataset_folder_name)
+        )
         self.batch_size = batch_size
 
     def training_step(self, batch: list[torch.Tensor], batch_idx: int) -> dict:
@@ -68,12 +71,8 @@ class LightningPerceptronClassifier(LightningBaseModule):
             dataset_folder_name=dataset_folder_name, batch_size=batch_size
         )
 
-        images_width, images_height, images_channels = get_width_height_channels(
-            dataset_folder_name
-        )
-
         self.fc1 = nn.Linear(
-            in_features=images_width * images_height * images_channels,
+            in_features=self.images_width * self.images_height * self.images_channels,
             out_features=hidden_dim,
         )
         self.fc2 = nn.Linear(in_features=hidden_dim, out_features=hidden_dim * 2)
@@ -118,12 +117,8 @@ class LightningCNNClassifier(LightningBaseModule):
             dataset_folder_name=dataset_folder_name, batch_size=batch_size
         )
 
-        images_width, images_height, images_channels = get_width_height_channels(
-            dataset_folder_name
-        )
-
         self.c1 = nn.Conv2d(
-            in_channels=images_channels,
+            in_channels=self.images_channels,
             out_channels=hidden_channels,
             kernel_size=3,
             padding=1,
@@ -156,7 +151,7 @@ class LightningCNNClassifier(LightningBaseModule):
         self.bn4 = nn.BatchNorm2d(num_features=hidden_channels * 2)
 
         self.fc = nn.Linear(
-            in_features=int((images_width / 4) ** 2 * hidden_channels * 2),
+            in_features=int((self.images_width / 4) ** 2 * hidden_channels * 2),
             out_features=output_dim,
         )
 
