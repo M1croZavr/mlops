@@ -4,7 +4,7 @@ services:
     build: .
     command: poetry run start-server
     ports:
-      - "8000:5000"
+      - "8000:8000"
     depends_on:
       - minio
 
@@ -25,6 +25,50 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
+
+  mlflow-db:
+    image: postgres
+    environment:
+      POSTGRES_DB: ${MLFLOW_POSTGRES_DB}
+      POSTGRES_USER: ${MLFLOW_USER}
+      POSTGRES_PASSWORD: ${MLFLOW_PASSWORD}
+    ports:
+      - "5432:5432"
+
+  mlflow-server:
+    build:
+      context: ./src/mlflow/
+      dockerfile: Dockerfile
+    depends_on:
+      - mlflow-db
+      - minio
+      - createbuckets
+    container_name: mlflow_server
+    environment:
+      AWS_REGION: eu-west-3
+      AWS_DEFAULT_REGION: eu-west-3
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+    ports:
+      - "5000:5000"
+    command: mlflow server --host 0.0.0.0 --port 8080 --workers 1 --backend-store-uri postgresql://${MLFLOW_USER}:${MLFLOW_PASSWORD}@mlflow-db:5432/${MLFLOW_POSTGRES_DB} --default-artifact-root s3://mlflow-bucket/
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      echo sleep 30;
+      sleep 30;
+      /usr/bin/mc config host add myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb myminio/mlflow-bucket;
+      exit 0;
+      "
+
+
+
 
 volumes:
   minio-storage:

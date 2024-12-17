@@ -7,6 +7,7 @@ import grpc
 import ml_service_pb2
 import ml_service_pb2_grpc
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import MLFlowLogger
 from global_vars import DATA_PATH, MAX_MESSAGE_LENGTH
 
 from models.modules import LightningPerceptronClassifier
@@ -58,10 +59,14 @@ class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):
         #     save_top_k=1,
         #     monitor="Validation loss"
         # )
+
+        mlf_logger = MLFlowLogger(experiment_name="lightning_logs", tracking_uri="file:./ml-runs")
+
         trainer = pl.Trainer(
             # fast_dev_run=True,
             max_epochs=3,
             enable_checkpointing=False,
+            logger=mlf_logger
             # max_epochs=hyperparameters.epochs,
             # default_root_dir=artifacts_dir,
             # callbacks=[checkpoint_callback]
