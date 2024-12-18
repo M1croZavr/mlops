@@ -10,3 +10,5 @@ data/*
 .ruff_cache
 minio-storage
 #.env
+database-storage
+mlruns

@@ -14,6 +14,7 @@ from fastapi_service.config import (
     ARTIFACTS_ROOT,
     CLASS_LABELS,
 )
+
 from fastapi_service.models import (
     AvailableCheckpointDescription,
     AvailableModelDescription,
