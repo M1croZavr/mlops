@@ -23,7 +23,19 @@ class LightningBaseModule(pl.LightningModule):
         x, y = batch
         logits = self(x)
         loss = F.cross_entropy(logits, y)
-        self.log("Training loss", loss, prog_bar=True, on_step=False, on_epoch=True)
+        self.log(
+            "Training loss",
+            loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+        )
+
+        accuracy = torch.mean((torch.argmax(logits.detach(), 1) == y).to(torch.float))
+        self.log(
+            "Training accuracy", accuracy, on_step=False, on_epoch=True, prog_bar=False, logger=True
+        )
         return {"loss": loss}
 
     def train_dataloader(self) -> torch.utils.data.DataLoader:
@@ -42,7 +54,19 @@ class LightningBaseModule(pl.LightningModule):
         x, y = batch
         logits = self(x)
         loss = F.cross_entropy(logits, y)
-        self.log("Validation loss", loss, on_step=False, on_epoch=True)
+        self.log(
+            "Validation loss",
+            loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+        )
+
+        accuracy = torch.mean((torch.argmax(logits, 1) == y).to(torch.float))
+        self.log(
+            "Validation accuracy", accuracy, on_step=False, on_epoch=True, prog_bar=False, logger=True
+        )
         return {"loss": loss}
 
     def val_dataloader(self) -> torch.utils.data.DataLoader:
@@ -87,7 +111,7 @@ class LightningPerceptronClassifier(LightningBaseModule):
 
         self.lr = learning_rate
 
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore="dataset_folder_name")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.flattener(x)
@@ -161,7 +185,7 @@ class LightningCNNClassifier(LightningBaseModule):
 
         self.lr = learning_rate
 
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore="dataset_folder_name")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         output = self.relu(self.bn1(self.c1(x)))
@@ -179,28 +203,3 @@ class LightningCNNClassifier(LightningBaseModule):
 
     def configure_optimizers(self) -> torch.optim.Adam:
         return torch.optim.Adam(self.parameters(), lr=self.lr)
-
-
-if __name__ == "__main__":
-    pass
-    # dataset = torchvision.datasets.MNIST(
-    #     self.data_path,
-    #     train=False,
-    #     transform=torchvision.transforms.ToTensor(),
-    #     download=False
-    # )
-    # model = LightningPerceptronClassifier(
-    #     Path(__file__).parent.parent.parent / "data" / "MNIST_DATA",
-    #     28 * 28,
-    #     32,
-    #     10
-    # )
-    # model = LightningCNNClassifier(
-    #     Path(__file__).parent.parent.parent / "data" / "MNIST_DATA",
-    #     1,
-    #     16,
-    #     28,
-    #     10
-    # )
-    # trainer = pl.Trainer(fast_dev_run=True, default_root_dir=None)
-    # trainer.fit(model)

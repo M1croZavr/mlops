@@ -14,7 +14,6 @@ from fastapi_service.config import (
     ARTIFACTS_ROOT,
     CLASS_LABELS,
 )
-
 from fastapi_service.models import (
     AvailableCheckpointDescription,
     AvailableModelDescription,
@@ -232,7 +231,7 @@ async def perform_healthcheck() -> HealthCheck:
 def main():
     """Launch uvicorn server on specified host and port"""
     uvicorn.run(
-        "src.fastapi_service.main:app", host=APP_HOST, port=APP_PORT, reload=True
+        "src.fastapi_service.main:app", host=APP_HOST, port=int(APP_PORT), reload=True
     )
 
 
