@@ -34,7 +34,12 @@ class LightningBaseModule(pl.LightningModule):
 
         accuracy = torch.mean((torch.argmax(logits.detach(), 1) == y).to(torch.float))
         self.log(
-            "Training accuracy", accuracy, on_step=False, on_epoch=True, prog_bar=False, logger=True
+            "Training accuracy",
+            accuracy,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=False,
+            logger=True,
         )
         return {"loss": loss}
 
@@ -65,7 +70,12 @@ class LightningBaseModule(pl.LightningModule):
 
         accuracy = torch.mean((torch.argmax(logits, 1) == y).to(torch.float))
         self.log(
-            "Validation accuracy", accuracy, on_step=False, on_epoch=True, prog_bar=False, logger=True
+            "Validation accuracy",
+            accuracy,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=False,
+            logger=True,
         )
         return {"loss": loss}
 
@@ -111,7 +121,7 @@ class LightningPerceptronClassifier(LightningBaseModule):
 
         self.lr = learning_rate
 
-        self.save_hyperparameters(ignore="dataset_folder_name")
+        self.save_hyperparameters()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.flattener(x)
@@ -185,7 +195,7 @@ class LightningCNNClassifier(LightningBaseModule):
 
         self.lr = learning_rate
 
-        self.save_hyperparameters(ignore="dataset_folder_name")
+        self.save_hyperparameters()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         output = self.relu(self.bn1(self.c1(x)))

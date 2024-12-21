@@ -6,7 +6,7 @@ from torch import nn
 from models.inference import predict
 
 
-class MockModel(pl.LightningModule):
+class FixtureModel(pl.LightningModule):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(nn.Flatten(), nn.Linear(28 * 28 * 1, 10), nn.ReLU())
@@ -15,9 +15,9 @@ class MockModel(pl.LightningModule):
         return self.model(x)
 
 
-class MockImage:
+class FixtureImage:
     def __init__(self):
-        self.bytesio = open("tests/fixtures/mnist_example.jpg", "rb")
+        self.bytesio = open("tests/fixtures/mnist_example1.jpg", "rb")
 
     @property
     def file(self):
@@ -26,26 +26,26 @@ class MockImage:
 
 class TestInference(unittest.TestCase):
     def setUp(self):
-        self.mock_model = MockModel()
-        self.mock_image = MockImage()
+        self.fixture_model = FixtureModel()
+        self.fixture_image = FixtureImage()
 
     def test_type(self):
-        index, value = predict(self.mock_model, self.mock_image)
+        index, value = predict(self.fixture_model, self.fixture_image)
         self.assertIsInstance(index, int)
         self.assertIsInstance(value, float)
 
     def test_value(self):
-        _, value = predict(self.mock_model, self.mock_image)
+        _, value = predict(self.fixture_model, self.fixture_image)
         self.assertLessEqual(value, 1)
         self.assertGreaterEqual(value, 0)
 
     def test_index(self):
-        index, _ = predict(self.mock_model, self.mock_image)
+        index, _ = predict(self.fixture_model, self.fixture_image)
         self.assertLessEqual(index, 9)
         self.assertGreaterEqual(index, 0)
 
     def tearDown(self):
-        self.mock_image.bytesio.close()
+        self.fixture_image.bytesio.close()
 
 
 if __name__ == "__main__":

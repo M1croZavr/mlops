@@ -7,7 +7,7 @@ from models.data_preprocessing import read_jpg_as_tensor
 
 class TestDataPreprocessing(unittest.TestCase):
     def setUp(self):
-        self.example1 = open("tests/fixtures/mnist_example.jpg", "rb")
+        self.example1 = open("tests/fixtures/mnist_example1.jpg", "rb")
         self.example2 = open("tests/fixtures/cifar10_example.jpg", "rb")
 
     def test_type(self):
