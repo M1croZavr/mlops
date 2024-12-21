@@ -13,7 +13,9 @@ jobs:
         with:
           python-version: '3.10'
       - name: Dependencies installation
-        run: poetry install --only dev
+        run: |
+          pip install poetry==1.8.2
+          poetry install --only dev
       - name: Ruff
         run: poetry run ruff check
       - name: Black
