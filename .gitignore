@@ -1,12 +1,17 @@
 .idea
 __pycache__
 .DS_Store
+.ruff_cache
+
+# Artifacts
 lightning_logs
+mlruns
 artifacts/
 data/*
 !data/*.dvc
 !data/MNIST.tar.gz
 !data/CIFAR10.tar.gz
-.ruff_cache
+
+# Container volumes
+mlflow_database-storage
 minio-storage
-#.env

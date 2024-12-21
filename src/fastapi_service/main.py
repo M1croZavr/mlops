@@ -23,6 +23,7 @@ from fastapi_service.models import (
     PerceptronClassifierHyperparameters,
 )
 from fastapi_service.s3.utils import (
+    create_buckets,
     delete_checkpoint_from_storage,
     extract_tar_into_s3,
     get_all_checkpoints_info,
@@ -230,8 +231,10 @@ async def perform_healthcheck() -> HealthCheck:
 
 def main():
     """Launch uvicorn server on specified host and port"""
+    # Create if not exists s3 storage buckets on application start up
+    create_buckets()
     uvicorn.run(
-        "src.fastapi_service.main:app", host=APP_HOST, port=APP_PORT, reload=True
+        "src.fastapi_service.main:app", host=APP_HOST, port=int(APP_PORT), reload=True
     )
 
 

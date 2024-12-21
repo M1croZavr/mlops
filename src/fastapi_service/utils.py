@@ -37,7 +37,7 @@ def get_all_checkpoints_info():
             checkpoints_list.append(
                 {
                     "dataset_folder_name": dataset_folder_name,
-                    "model_filename": model_filename.name.rstrip(".ckpt"),
+                    "model_filename": model_filename.name.removesuffix(".ckpt"),
                 }
             )
     return checkpoints_list
@@ -45,7 +45,7 @@ def get_all_checkpoints_info():
 
 def get_checkpoint_path(dataset_folder_name: str, model_filename: str):
     artifacts_dir = ARTIFACTS_ROOT / dataset_folder_name
-    model_filename = model_filename.rstrip(".ckpt")
+    model_filename = model_filename.removesuffix(".ckpt")
     checkpoint_path = artifacts_dir / f"{model_filename}.ckpt"
 
     if not checkpoint_path.exists():

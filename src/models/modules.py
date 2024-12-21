@@ -14,13 +14,33 @@ class LightningBaseModule(pl.LightningModule):
         super(LightningBaseModule, self).__init__()
 
         self.dataset_dir = get_dataset_dir(dataset_folder_name)
+        self.images_width, self.images_height, self.images_channels = (
+            get_width_height_channels(dataset_folder_name)
+        )
         self.batch_size = batch_size
 
     def training_step(self, batch: list[torch.Tensor], batch_idx: int) -> dict:
         x, y = batch
         logits = self(x)
         loss = F.cross_entropy(logits, y)
-        self.log("Training loss", loss, prog_bar=True, on_step=False, on_epoch=True)
+        self.log(
+            "Training loss",
+            loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+        )
+
+        accuracy = torch.mean((torch.argmax(logits.detach(), 1) == y).to(torch.float))
+        self.log(
+            "Training accuracy",
+            accuracy,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=False,
+            logger=True,
+        )
         return {"loss": loss}
 
     def train_dataloader(self) -> torch.utils.data.DataLoader:
@@ -39,7 +59,24 @@ class LightningBaseModule(pl.LightningModule):
         x, y = batch
         logits = self(x)
         loss = F.cross_entropy(logits, y)
-        self.log("Validation loss", loss, on_step=False, on_epoch=True)
+        self.log(
+            "Validation loss",
+            loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+        )
+
+        accuracy = torch.mean((torch.argmax(logits, 1) == y).to(torch.float))
+        self.log(
+            "Validation accuracy",
+            accuracy,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=False,
+            logger=True,
+        )
         return {"loss": loss}
 
     def val_dataloader(self) -> torch.utils.data.DataLoader:
@@ -68,12 +105,8 @@ class LightningPerceptronClassifier(LightningBaseModule):
             dataset_folder_name=dataset_folder_name, batch_size=batch_size
         )
 
-        images_width, images_height, images_channels = get_width_height_channels(
-            dataset_folder_name
-        )
-
         self.fc1 = nn.Linear(
-            in_features=images_width * images_height * images_channels,
+            in_features=self.images_width * self.images_height * self.images_channels,
             out_features=hidden_dim,
         )
         self.fc2 = nn.Linear(in_features=hidden_dim, out_features=hidden_dim * 2)
@@ -118,12 +151,8 @@ class LightningCNNClassifier(LightningBaseModule):
             dataset_folder_name=dataset_folder_name, batch_size=batch_size
         )
 
-        images_width, images_height, images_channels = get_width_height_channels(
-            dataset_folder_name
-        )
-
         self.c1 = nn.Conv2d(
-            in_channels=images_channels,
+            in_channels=self.images_channels,
             out_channels=hidden_channels,
             kernel_size=3,
             padding=1,
@@ -156,7 +185,7 @@ class LightningCNNClassifier(LightningBaseModule):
         self.bn4 = nn.BatchNorm2d(num_features=hidden_channels * 2)
 
         self.fc = nn.Linear(
-            in_features=int((images_width / 4) ** 2 * hidden_channels * 2),
+            in_features=int((self.images_width / 4) ** 2 * hidden_channels * 2),
             out_features=output_dim,
         )
 
@@ -184,28 +213,3 @@ class LightningCNNClassifier(LightningBaseModule):
 
     def configure_optimizers(self) -> torch.optim.Adam:
         return torch.optim.Adam(self.parameters(), lr=self.lr)
-
-
-if __name__ == "__main__":
-    pass
-    # dataset = torchvision.datasets.MNIST(
-    #     self.data_path,
-    #     train=False,
-    #     transform=torchvision.transforms.ToTensor(),
-    #     download=False
-    # )
-    # model = LightningPerceptronClassifier(
-    #     Path(__file__).parent.parent.parent / "data" / "MNIST_DATA",
-    #     28 * 28,
-    #     32,
-    #     10
-    # )
-    # model = LightningCNNClassifier(
-    #     Path(__file__).parent.parent.parent / "data" / "MNIST_DATA",
-    #     1,
-    #     16,
-    #     28,
-    #     10
-    # )
-    # trainer = pl.Trainer(fast_dev_run=True, default_root_dir=None)
-    # trainer.fit(model)
