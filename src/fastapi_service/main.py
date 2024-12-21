@@ -234,7 +234,7 @@ def main():
     uvicorn.run(
         "src.fastapi_service.main:app", host=APP_HOST, port=int(APP_PORT), reload=True
     )
-    # Create s3 storage buckets on application start up
+    # Create if not exists s3 storage buckets on application start up
     create_buckets()
 
 
