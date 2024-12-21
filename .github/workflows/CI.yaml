@@ -20,3 +20,21 @@ jobs:
         run: poetry run ruff check
       - name: Black
         run: poetry run black --check .
+
+  test:
+    needs:
+      - lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Dependencies installation
+        run: |
+          pip install poetry==1.8.2
+          poetry install --without dev
+      - name: Run tests
+        run: poetry run python -m unittest -v discover -s tests
