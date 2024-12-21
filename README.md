@@ -56,6 +56,6 @@ version - номер версии датасета
 
 ## Тесты
 1. Тесты находятся в `./tests`
-2. Запуск тестов `poetry run python -m unittest -v discover -s tests`
+2. Запуск тестов `poetry run python -m unittest discover -v -s tests`
 
 ___Состав команды:___ Исаев Артём, Лашуков Тимофей, Турыгин Дмитрий
