@@ -231,11 +231,11 @@ async def perform_healthcheck() -> HealthCheck:
 
 def main():
     """Launch uvicorn server on specified host and port"""
+    # Create if not exists s3 storage buckets on application start up
+    create_buckets()
     uvicorn.run(
         "src.fastapi_service.main:app", host=APP_HOST, port=int(APP_PORT), reload=True
     )
-    # Create if not exists s3 storage buckets on application start up
-    create_buckets()
 
 
 if __name__ == "__main__":

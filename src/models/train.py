@@ -28,6 +28,7 @@ def train(
         tracking_uri=f"http://mlflow:{MLFLOW_PORT}",
         log_model=True,
     )
+    mlf_logger.log_hyperparams({"epochs": epochs})
 
     trainer = pl.Trainer(
         max_epochs=epochs,
