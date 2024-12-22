@@ -59,6 +59,6 @@ if __name__ == "__main__":
     )
     stub = ml_service_pb2_grpc.MLServiceStub(channel)
 
-    # run_load_data(stub)
+    run_load_data(stub)
     # run_train_model(stub)
-    run_predict(stub)
+    # run_predict(stub)
