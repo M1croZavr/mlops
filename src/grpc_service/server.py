@@ -7,30 +7,24 @@ import grpc
 import ml_service_pb2
 import ml_service_pb2_grpc
 import pytorch_lightning as pl
-from global_vars import DATA_PATH, MAX_MESSAGE_LENGTH
+
+from fastapi_service.config import CLASS_LABELS
+from global_vars import MAX_MESSAGE_LENGTH, FileWrapper
 from pytorch_lightning.loggers import MLFlowLogger
+from fastapi_service.s3.utils import extract_tar_into_s3, get_checkpoint_path
+from models import train, inference
 
 from models.modules import LightningPerceptronClassifier
 
-
 class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):
     def LoadData(self, request, context):
-        # Save the uploaded .zip file to a local directory
-        # file_path = f"./uploads/{request.file_name}"
-        # os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-        # Write the received bytes to a .zip file
-        # with open(file_path, "wb") as f:
-        #     f.write(request.file_data)
-
-        # Extract the .zip file to a folder
 
         try:
-            extract_path = DATA_PATH
-            io_train_dataset_bytes = io.BytesIO(request.file_data)
-            tar = tarfile.open(mode="r:gz", fileobj=io_train_dataset_bytes)
-            tar.extractall(path=DATA_PATH)
-            message = f"Data extracted to {extract_path}"
+            io_dataset_bytes = io.BytesIO(request.dataset_file)
+            with tarfile.open(mode="r:gz", fileobj=io_dataset_bytes) as tar:
+                extract_tar_into_s3(tar)
+
+            message = f"Data extracted into s3"
             success = True
         except Exception as e:
             message = f"Error: {e}"
@@ -39,47 +33,36 @@ class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):
         return ml_service_pb2.LoadDataResponse(success=success, message=message)
 
     def TrainModel(self, request, context):
-        print(
-            f"Training model with {request.epochs} epochs and learning rate {request.learning_rate}"
-        )
-        training_accuracy = 0.85
-        success = True
 
         model = LightningPerceptronClassifier(
-            data_root=DATA_PATH / "MNIST_DATA",
-            input_dim=28 * 28,
-            hidden_dim=16,
-            output_dim=10,
-            learning_rate=0.001,
-            batch_size=32,
-        )
-        # checkpoint_callback = pl.callbacks.ModelCheckpoint(
-        #     dirpath=artifacts_dir,
-        #     filename=model_filename,
-        #     save_top_k=1,
-        #     monitor="Validation loss"
-        # )
-
-        mlf_logger = MLFlowLogger(
-            experiment_name="lightning_logs", tracking_uri="file:./ml-runs"
+            dataset_folder_name=request.dataset_folder_name,
+            hidden_dim=request.hidden_dim,
+            output_dim=request.n_classes,
+            learning_rate=request.learning_rate,
+            batch_size=request.batch_size,
         )
 
-        trainer = pl.Trainer(
-            # fast_dev_run=True,
-            max_epochs=3,
-            enable_checkpointing=False,
-            logger=mlf_logger,
-            # max_epochs=hyperparameters.epochs,
-            # default_root_dir=artifacts_dir,
-            # callbacks=[checkpoint_callback]
-        )
-        trainer.fit(model)
+        train.train(model, request.epochs, request.dataset_folder_name, request.model_filename)
 
         return ml_service_pb2.TrainModelResponse(
-            success=success,
-            message="Training completed",
-            training_accuracy=training_accuracy,
+            success=True,
         )
+
+    def Predict(self, request, context):
+
+        model_checkpoint_path = get_checkpoint_path(request.dataset_folder_name, request.model_filename)
+        model = LightningPerceptronClassifier.load_from_checkpoint(model_checkpoint_path)
+
+        image_file = FileWrapper(request.image_file)
+
+        index, proba = inference.predict(model, image_file)
+        label = CLASS_LABELS.get(request.dataset_folder_name)[index]
+
+        return ml_service_pb2.LoadPredResponse(
+            label=label,
+            probability=proba
+        )
+
 
 
 def serve():
