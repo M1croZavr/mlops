@@ -39,6 +39,11 @@
 12. Отслеживание процесса обучения и результатов доступно в MLFlow по адресу http://127.0.0.1:5001
 13. Для остановки и удаления контейнеров с образами `docker compose down --volumes --rmi all`
 
+## Для использования gRPC сервиса
+1. Перейти в `./src/grpc_service`
+2. Запустить сервер `poetry run python server.py`
+3. Запустить пример клиента `poetry run python server.py`
+
 ## Для использования Streamlit сервиса
 1. В другом терминале прописать: `poetry run streamlit run src/frontend/streamlit_app.py `
 2. Следовать шагам в открывшейся странице браузера

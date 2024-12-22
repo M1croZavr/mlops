@@ -6,34 +6,22 @@ from concurrent import futures
 import grpc
 import ml_service_pb2
 import ml_service_pb2_grpc
-import pytorch_lightning as pl
 
 from fastapi_service.config import CLASS_LABELS
-from global_vars import MAX_MESSAGE_LENGTH, FileWrapper
-from pytorch_lightning.loggers import MLFlowLogger
 from fastapi_service.s3.utils import extract_tar_into_s3, get_checkpoint_path
-from models import train, inference
-
+from grpc_service.utils import MAX_MESSAGE_LENGTH, FileWrapper
+from models import inference, train
 from models.modules import LightningPerceptronClassifier
+
 
 class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):
     def LoadData(self, request, context):
-
-        try:
-            io_dataset_bytes = io.BytesIO(request.dataset_file)
-            with tarfile.open(mode="r:gz", fileobj=io_dataset_bytes) as tar:
-                extract_tar_into_s3(tar)
-
-            message = f"Data extracted into s3"
-            success = True
-        except Exception as e:
-            message = f"Error: {e}"
-            success = False
-
-        return ml_service_pb2.LoadDataResponse(success=success, message=message)
+        io_dataset_bytes = io.BytesIO(request.dataset_file)
+        with tarfile.open(mode="r:gz", fileobj=io_dataset_bytes) as tar:
+            extract_tar_into_s3(tar)
+        return ml_service_pb2.LoadDataResponse(success=True)
 
     def TrainModel(self, request, context):
-
         model = LightningPerceptronClassifier(
             dataset_folder_name=request.dataset_folder_name,
             hidden_dim=request.hidden_dim,
@@ -41,28 +29,25 @@ class MLServiceServicer(ml_service_pb2_grpc.MLServiceServicer):
             learning_rate=request.learning_rate,
             batch_size=request.batch_size,
         )
-
-        train.train(model, request.epochs, request.dataset_folder_name, request.model_filename)
-
-        return ml_service_pb2.TrainModelResponse(
-            success=True,
+        train.train(
+            model, request.epochs, request.dataset_folder_name, request.model_filename
         )
+        return ml_service_pb2.TrainModelResponse(success=True)
 
     def Predict(self, request, context):
-
-        model_checkpoint_path = get_checkpoint_path(request.dataset_folder_name, request.model_filename)
-        model = LightningPerceptronClassifier.load_from_checkpoint(model_checkpoint_path)
-
-        image_file = FileWrapper(request.image_file)
-
-        index, proba = inference.predict(model, image_file)
-        label = CLASS_LABELS.get(request.dataset_folder_name)[index]
-
-        return ml_service_pb2.LoadPredResponse(
-            label=label,
-            probability=proba
+        model_checkpoint_path = get_checkpoint_path(
+            request.dataset_folder_name, request.model_filename
+        )
+        model = LightningPerceptronClassifier.load_from_checkpoint(
+            model_checkpoint_path
         )
 
+        image_file = FileWrapper(io.BytesIO(request.image_file))
+
+        index, value = inference.predict(model, image_file)
+        label = str(CLASS_LABELS.get(request.dataset_folder_name)[index])
+
+        return ml_service_pb2.PredictResponse(label=label, probability=value)
 
 
 def serve():

@@ -2,25 +2,22 @@
 syntax = "proto3";
 
 service MLService {
-  // Load data for training
+  // Load data for training and validation
   rpc LoadData(LoadDataRequest) returns (LoadDataResponse);
 
   // Train the model
   rpc TrainModel(TrainModelRequest) returns (TrainModelResponse);
 
-  // Predict
-  rpc Predict(LoadPredRequest) returns (LoadPredResponse);
+  // Predict by the model
+  rpc Predict(PredictRequest) returns (PredictResponse);
 }
 
 message LoadDataRequest {
   bytes dataset_file = 1;
 }
-
 message LoadDataResponse {
   bool success = 1;
-  string message = 2;
 }
-
 
 message TrainModelRequest {
   int32 epochs = 1;
@@ -31,18 +28,16 @@ message TrainModelRequest {
   string dataset_folder_name = 6;
   string model_filename = 7;
 }
-
 message TrainModelResponse {
   bool success = 1;
 }
 
-message LoadPredRequest {
+message PredictRequest {
   string model_filename = 1;
   string dataset_folder_name = 2;
   bytes image_file = 3;
 }
-
-message LoadPredResponse {
+message PredictResponse {
   string label = 1;
   float probability = 2;
 }

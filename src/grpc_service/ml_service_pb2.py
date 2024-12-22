@@ -4,45 +4,42 @@
 # source: ml_service.proto
 # Protobuf Python Version: 5.28.1
 """Generated protocol buffer code."""
+
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC,
-    5,
-    28,
-    1,
-    '',
-    'ml_service.proto'
+    _runtime_version.Domain.PUBLIC, 5, 28, 1, "", "ml_service.proto"
 )
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-
-
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10ml_service.proto\"\'\n\x0fLoadDataRequest\x12\x14\n\x0c\x64\x61taset_file\x18\x01 \x01(\x0c\"4\n\x10LoadDataResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\xaa\x01\n\x11TrainModelRequest\x12\x0e\n\x06\x65pochs\x18\x01 \x01(\x05\x12\x11\n\tn_classes\x18\x02 \x01(\x05\x12\x15\n\rlearning_rate\x18\x03 \x01(\x02\x12\x12\n\nbatch_size\x18\x04 \x01(\x05\x12\x12\n\nhidden_dim\x18\x05 \x01(\x05\x12\x1b\n\x13\x64\x61taset_folder_name\x18\x06 \x01(\t\x12\x16\n\x0emodel_filename\x18\x07 \x01(\t\"%\n\x12TrainModelResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"Z\n\x0fLoadPredRequest\x12\x16\n\x0emodel_filename\x18\x01 \x01(\t\x12\x1b\n\x13\x64\x61taset_folder_name\x18\x02 \x01(\t\x12\x12\n\nimage_file\x18\x03 \x01(\x0c\"6\n\x10LoadPredResponse\x12\r\n\x05label\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\x32\xa3\x01\n\tMLService\x12/\n\x08LoadData\x12\x10.LoadDataRequest\x1a\x11.LoadDataResponse\x12\x35\n\nTrainModel\x12\x12.TrainModelRequest\x1a\x13.TrainModelResponse\x12.\n\x07Predict\x12\x10.LoadPredRequest\x1a\x11.LoadPredResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x10ml_service.proto"\'\n\x0fLoadDataRequest\x12\x14\n\x0c\x64\x61taset_file\x18\x01 \x01(\x0c"#\n\x10LoadDataResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08"\xaa\x01\n\x11TrainModelRequest\x12\x0e\n\x06\x65pochs\x18\x01 \x01(\x05\x12\x11\n\tn_classes\x18\x02 \x01(\x05\x12\x15\n\rlearning_rate\x18\x03 \x01(\x02\x12\x12\n\nbatch_size\x18\x04 \x01(\x05\x12\x12\n\nhidden_dim\x18\x05 \x01(\x05\x12\x1b\n\x13\x64\x61taset_folder_name\x18\x06 \x01(\t\x12\x16\n\x0emodel_filename\x18\x07 \x01(\t"%\n\x12TrainModelResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08"Y\n\x0ePredictRequest\x12\x16\n\x0emodel_filename\x18\x01 \x01(\t\x12\x1b\n\x13\x64\x61taset_folder_name\x18\x02 \x01(\t\x12\x12\n\nimage_file\x18\x03 \x01(\x0c"5\n\x0fPredictResponse\x12\r\n\x05label\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\x02\x32\xa1\x01\n\tMLService\x12/\n\x08LoadData\x12\x10.LoadDataRequest\x1a\x11.LoadDataResponse\x12\x35\n\nTrainModel\x12\x12.TrainModelRequest\x1a\x13.TrainModelResponse\x12,\n\x07Predict\x12\x0f.PredictRequest\x1a\x10.PredictResponseb\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'ml_service_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "ml_service_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_LOADDATAREQUEST']._serialized_start=20
-  _globals['_LOADDATAREQUEST']._serialized_end=59
-  _globals['_LOADDATARESPONSE']._serialized_start=61
-  _globals['_LOADDATARESPONSE']._serialized_end=113
-  _globals['_TRAINMODELREQUEST']._serialized_start=116
-  _globals['_TRAINMODELREQUEST']._serialized_end=286
-  _globals['_TRAINMODELRESPONSE']._serialized_start=288
-  _globals['_TRAINMODELRESPONSE']._serialized_end=325
-  _globals['_LOADPREDREQUEST']._serialized_start=327
-  _globals['_LOADPREDREQUEST']._serialized_end=417
-  _globals['_LOADPREDRESPONSE']._serialized_start=419
-  _globals['_LOADPREDRESPONSE']._serialized_end=473
-  _globals['_MLSERVICE']._serialized_start=476
-  _globals['_MLSERVICE']._serialized_end=639
+    DESCRIPTOR._loaded_options = None
+    _globals["_LOADDATAREQUEST"]._serialized_start = 20
+    _globals["_LOADDATAREQUEST"]._serialized_end = 59
+    _globals["_LOADDATARESPONSE"]._serialized_start = 61
+    _globals["_LOADDATARESPONSE"]._serialized_end = 96
+    _globals["_TRAINMODELREQUEST"]._serialized_start = 99
+    _globals["_TRAINMODELREQUEST"]._serialized_end = 269
+    _globals["_TRAINMODELRESPONSE"]._serialized_start = 271
+    _globals["_TRAINMODELRESPONSE"]._serialized_end = 308
+    _globals["_PREDICTREQUEST"]._serialized_start = 310
+    _globals["_PREDICTREQUEST"]._serialized_end = 399
+    _globals["_PREDICTRESPONSE"]._serialized_start = 401
+    _globals["_PREDICTRESPONSE"]._serialized_end = 454
+    _globals["_MLSERVICE"]._serialized_start = 457
+    _globals["_MLSERVICE"]._serialized_end = 618
 # @@protoc_insertion_point(module_scope)
