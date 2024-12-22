@@ -37,12 +37,12 @@
 10. Получить прогнозы для чекпойнта по названию модели, имени датасета и переданному изображению в /predict/{model_filename}
 11. MINIO панель доступна на хосте по адресу http://127.0.0.1:9001; Логин и пароль из .env файла
 12. Отслеживание процесса обучения и результатов доступно в MLFlow по адресу http://127.0.0.1:5001
-13. Для остановки и удаления контейнеров с образами `docker compose down --volumes --rmi all`
+13. Для остановки и удаления контейнеров с образами `docker-compose down --volumes --rmi all`
 
 ## Для использования gRPC сервиса
-1. Перейти в `./src/grpc_service`
+1. Перейти в контейнере приложения app в `./src/grpc_service`
 2. Запустить сервер `poetry run python server.py`
-3. Запустить пример клиента `poetry run python server.py`
+3. Запустить примеры клиента, функции из client.py `poetry run python client.py`
 
 ## Для использования Streamlit сервиса
 1. В другом терминале прописать: `poetry run streamlit run src/frontend/streamlit_app.py `
