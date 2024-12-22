@@ -10,6 +10,7 @@ APP_VERSION = "0.1.0"
 APP_HOST = "0.0.0.0"
 APP_PORT = os.getenv("APP_PORT", 8000)
 
+MLFLOW_HOST = "mlflow"
 MLFLOW_PORT = os.getenv("MLFLOW_PORT", 9000)
 
 ROOT = pathlib.Path(__file__).parent.parent.parent

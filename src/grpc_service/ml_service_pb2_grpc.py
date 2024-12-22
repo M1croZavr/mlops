@@ -4,7 +4,7 @@
 import grpc
 import ml_service_pb2 as ml__service__pb2
 
-GRPC_GENERATED_VERSION = "1.67.1"
+GRPC_GENERATED_VERSION = "1.68.1"
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -48,19 +48,31 @@ class MLServiceStub(object):
             response_deserializer=ml__service__pb2.TrainModelResponse.FromString,
             _registered_method=True,
         )
+        self.Predict = channel.unary_unary(
+            "/MLService/Predict",
+            request_serializer=ml__service__pb2.PredictRequest.SerializeToString,
+            response_deserializer=ml__service__pb2.PredictResponse.FromString,
+            _registered_method=True,
+        )
 
 
 class MLServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def LoadData(self, request, context):
-        """Load data for training"""
+        """Load data for training and validation"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def TrainModel(self, request, context):
         """Train the model"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def Predict(self, request, context):
+        """Predict by the model"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -77,6 +89,11 @@ def add_MLServiceServicer_to_server(servicer, server):
             servicer.TrainModel,
             request_deserializer=ml__service__pb2.TrainModelRequest.FromString,
             response_serializer=ml__service__pb2.TrainModelResponse.SerializeToString,
+        ),
+        "Predict": grpc.unary_unary_rpc_method_handler(
+            servicer.Predict,
+            request_deserializer=ml__service__pb2.PredictRequest.FromString,
+            response_serializer=ml__service__pb2.PredictResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -139,6 +156,36 @@ class MLService(object):
             "/MLService/TrainModel",
             ml__service__pb2.TrainModelRequest.SerializeToString,
             ml__service__pb2.TrainModelResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True,
+        )
+
+    @staticmethod
+    def Predict(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/MLService/Predict",
+            ml__service__pb2.PredictRequest.SerializeToString,
+            ml__service__pb2.PredictResponse.FromString,
             options,
             channel_credentials,
             insecure,
