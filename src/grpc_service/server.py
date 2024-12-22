@@ -8,7 +8,11 @@ import ml_service_pb2
 import ml_service_pb2_grpc
 
 from fastapi_service.config import CLASS_LABELS
-from fastapi_service.s3.utils import extract_tar_into_s3, get_checkpoint_path
+from fastapi_service.s3.utils import (
+    create_buckets,
+    extract_tar_into_s3,
+    get_checkpoint_path,
+)
 from grpc_service.utils import MAX_MESSAGE_LENGTH, FileWrapper
 from models import inference, train
 from models.modules import LightningPerceptronClassifier
@@ -71,4 +75,6 @@ def serve():
 
 
 if __name__ == "__main__":
+    # Create if not exists s3 storage buckets on application start up
+    create_buckets()
     serve()
