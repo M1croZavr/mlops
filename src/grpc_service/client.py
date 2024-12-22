@@ -6,24 +6,15 @@ from utils import MAX_MESSAGE_LENGTH
 from fastapi_service.config import DATA_ROOT, ROOT
 
 
-def run():
-    # Connect to the grpc server
-    channel = grpc.insecure_channel(
-        "localhost:50051",
-        options=[
-            ("grpc.max_message_length", MAX_MESSAGE_LENGTH),
-            ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
-            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
-        ],
-    )
-    stub = ml_service_pb2_grpc.MLServiceStub(channel)
-
+def run_load_data(stub):
     # Load data for training and validation
     with open(DATA_ROOT / "MNIST.tar.gz", "rb") as file:
         archive_bytes = file.read()
     response = stub.LoadData(ml_service_pb2.LoadDataRequest(dataset_file=archive_bytes))
     print("LoadData Response:", response.success)
 
+
+def run_train_model(stub):
     # Train the model
     response = stub.TrainModel(
         ml_service_pb2.TrainModelRequest(
@@ -38,6 +29,8 @@ def run():
     )
     print("TrainModel Response:", response.success)
 
+
+def run_predict(stub):
     # Predict example by the model
     image_path = ROOT / "tests" / "fixtures" / "mnist_example3.jpg"
     with open(image_path, "rb") as file:
@@ -55,4 +48,17 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    # Connect to the grpc server
+    channel = grpc.insecure_channel(
+        "localhost:50051",
+        options=[
+            ("grpc.max_message_length", MAX_MESSAGE_LENGTH),
+            ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ],
+    )
+    stub = ml_service_pb2_grpc.MLServiceStub(channel)
+
+    # run_load_data(stub)
+    # run_train_model(stub)
+    run_predict(stub)

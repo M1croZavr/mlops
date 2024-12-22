@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import MLFlowLogger
 
-from fastapi_service.config import MLFLOW_PORT, MLFLOW_HOST
+from fastapi_service.config import MLFLOW_HOST, MLFLOW_PORT
 from fastapi_service.s3.utils import save_checkpoint
 from fastapi_service.utils import get_checkpoint_dir_and_name
 

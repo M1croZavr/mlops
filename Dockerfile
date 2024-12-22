@@ -12,6 +12,8 @@ RUN poetry install --without dev --no-root
 COPY src ./src
 RUN poetry install --only-root
 
+COPY data/MNIST.tar.gz ./data/MNIST.tar.gz
+
 EXPOSE 8000
 
 ENTRYPOINT ["poetry", "run", "start-server"]
