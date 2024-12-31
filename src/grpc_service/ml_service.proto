@@ -1,0 +1,43 @@
+// ml_service.proto
+syntax = "proto3";
+
+service MLService {
+  // Load data for training and validation
+  rpc LoadData(LoadDataRequest) returns (LoadDataResponse);
+
+  // Train the model
+  rpc TrainModel(TrainModelRequest) returns (TrainModelResponse);
+
+  // Predict by the model
+  rpc Predict(PredictRequest) returns (PredictResponse);
+}
+
+message LoadDataRequest {
+  bytes dataset_file = 1;
+}
+message LoadDataResponse {
+  bool success = 1;
+}
+
+message TrainModelRequest {
+  int32 epochs = 1;
+  int32 n_classes = 2;
+  float learning_rate = 3;
+  int32 batch_size = 4;
+  int32 hidden_dim = 5;
+  string dataset_folder_name = 6;
+  string model_filename = 7;
+}
+message TrainModelResponse {
+  bool success = 1;
+}
+
+message PredictRequest {
+  string model_filename = 1;
+  string dataset_folder_name = 2;
+  bytes image_file = 3;
+}
+message PredictResponse {
+  string label = 1;
+  float probability = 2;
+}
